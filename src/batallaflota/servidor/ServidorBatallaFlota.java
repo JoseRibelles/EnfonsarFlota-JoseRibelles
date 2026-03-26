@@ -1,5 +1,6 @@
 package batallaflota.servidor;
 
+import batallaflota.client.ColorTerminal;
 import batallaflota.model.Tauler;
 import batallaflota.utils.Constants;
 
@@ -18,7 +19,7 @@ public class ServidorBatallaFlota {
     private boolean enExecucio;
 
     public ServidorBatallaFlota(int port) {
-        this.port     = port;
+        this.port = port;
         this.jugadors = new ArrayList<>();
         this.enExecucio = true;
     }
@@ -27,20 +28,22 @@ public class ServidorBatallaFlota {
         socketServidor = new ServerSocket(port);
         taulerServidor = new Tauler("SERVIDOR");
 
-        System.out.println("=== SERVIDOR BATALLA FLOTA ===");
-        System.out.println("Escoltant al port " + port);
+        printCabecera();
+        printInfo("Escoltant al port " + port);
+        printSeparador();
         System.out.println(taulerServidor.getTaulerVisualCompleto());
+        printSeparador();
     }
 
     public void escolta() {
-        System.out.println("Esperant jugadors...");
+        printInfo("Esperant jugadors...");
         try {
             while (enExecucio) {
                 Socket socketClient = socketServidor.accept();
-                System.out.println("[SERVER] Nova connexio: " + socketClient.getInetAddress());
+                printSuccess("[SERVER] Nova connexio: " + socketClient.getInetAddress());
 
                 if (taulerServidor.isVictoria()) {
-                    System.out.println("[SERVER] Reiniciant tauler del servidor per nova partida");
+                    printWarning("[SERVER] Reiniciant tauler del servidor per nova partida");
                     taulerServidor = new Tauler("SERVIDOR");
                     System.out.println(taulerServidor.getTaulerVisualCompleto());
                 }
@@ -49,10 +52,12 @@ public class ServidorBatallaFlota {
                 jugadors.add(thread);
                 thread.start();
 
-                System.out.println("[SERVER] Jugadors actius: " + jugadors.size());
+                printInfo("[SERVER] Jugadors actius: " + ColorTerminal.YELLOW + jugadors.size() + ColorTerminal.RESET);
             }
         } catch (IOException ex) {
-            if (enExecucio) System.err.println("[SERVER] Error: " + ex.getMessage());
+            if (enExecucio) {
+                printError("[SERVER] Error: " + ex.getMessage());
+            }
         } finally {
             tanca();
         }
@@ -60,18 +65,45 @@ public class ServidorBatallaFlota {
 
     public synchronized void eliminaJugador(ThreadJugador jugador) {
         jugadors.remove(jugador);
-        System.out.println("[SERVER] Jugador desconnectat. Actius: " + jugadors.size());
+        printWarning("[SERVER] Jugador desconnectat: " + jugador.getNomJugador() + " | Actius: " + jugadors.size());
     }
 
     public void tanca() {
         try {
             enExecucio = false;
-            if (socketServidor != null && !socketServidor.isClosed())
+            if (socketServidor != null && !socketServidor.isClosed()) {
                 socketServidor.close();
-            System.out.println("[SERVER] Servidor tancat");
+            }
+            printInfo("[SERVER] Servidor tancat");
         } catch (IOException ex) {
-            System.err.println("[SERVER] Error tancant: " + ex.getMessage());
+            printError("[SERVER] Error tancant: " + ex.getMessage());
         }
+    }
+
+    private void printCabecera() {
+        System.out.println(ColorTerminal.CYAN + "╔════════════════════════════════════╗" + ColorTerminal.RESET);
+        System.out.println(ColorTerminal.CYAN + "║  🚢 SERVIDOR BATALLA FLOTA 🚢     ║" + ColorTerminal.RESET);
+        System.out.println(ColorTerminal.CYAN + "╚════════════════════════════════════╝" + ColorTerminal.RESET);
+    }
+
+    private void printInfo(String mensaje) {
+        System.out.println(ColorTerminal.BLUE + "ℹ️  " + mensaje + ColorTerminal.RESET);
+    }
+
+    private void printSuccess(String mensaje) {
+        System.out.println(ColorTerminal.GREEN + "✅ " + mensaje + ColorTerminal.RESET);
+    }
+
+    private void printWarning(String mensaje) {
+        System.out.println(ColorTerminal.YELLOW + "⚠️  " + mensaje + ColorTerminal.RESET);
+    }
+
+    private void printError(String mensaje) {
+        System.err.println(ColorTerminal.RED + "❌ " + mensaje + ColorTerminal.RESET);
+    }
+
+    private void printSeparador() {
+        System.out.println(ColorTerminal.CYAN + "════════════════════════════════════════" + ColorTerminal.RESET);
     }
 
     public static void main(String[] args) {
@@ -80,7 +112,8 @@ public class ServidorBatallaFlota {
             servidor.inicialitza();
             servidor.escolta();
         } catch (IOException ex) {
-            System.err.println("Error fatal: " + ex.getMessage());
+            System.err.println(ColorTerminal.RED + "❌ Error fatal: " + ex.getMessage() + ColorTerminal.RESET);
+            ex.printStackTrace();
         }
     }
 }

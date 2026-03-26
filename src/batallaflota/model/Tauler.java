@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import batallaflota.utils.Constants;
+import batallaflota.client.ColorTerminal;
 
 public class Tauler implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -124,21 +125,32 @@ public class Tauler implements Serializable {
 
     public String getTaulerVisualCompleto() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n=== TAULER DE ").append(nomJugador).append(" (COMPLET) ===\n");
-        sb.append("   0 1 2 3 4 5 6 7 8 9\n");
+        sb.append("\n--- TAULER DE ").append(nomJugador).append(" ---\n");
+        sb.append("  0 1 2 3 4 5 6 7 8 9\n");
         for (int i = 0; i < Constants.TAULER_MIDA; i++) {
-            sb.append(i).append("  ");
+            sb.append(i).append(" ");
             for (int j = 0; j < Constants.TAULER_MIDA; j++) {
                 switch (tauler[i][j]) {
-                    case  0: sb.append(". "); break;
-                    case  1: sb.append("V "); break;
-                    case -1: sb.append("X "); break;
-                    case -2: sb.append("~ "); break;
+                    case  0:
+                        sb.append(". ");
+                        break;
+                    case  1:
+                        sb.append("V ");
+                        break;
+                    case -1:
+                        sb.append(ColorTerminal.RED).append("X ").append(ColorTerminal.RESET);
+                        break;
+                    case -2:
+                        sb.append(ColorTerminal.BRIGHT_BLUE).append("~ ").append(ColorTerminal.RESET);
+                        break;
                 }
             }
             sb.append("\n");
         }
-        sb.append("Llegenda: V=Vaixell, X=Tocat, ~=Aigua, .=Lliure\n");
+        sb.append("Llegenda: V=Vaixell, ");
+        sb.append(ColorTerminal.RED).append("X").append(ColorTerminal.RESET).append("=Tocat, ");
+        sb.append(ColorTerminal.BRIGHT_BLUE).append("~").append(ColorTerminal.RESET).append("=Aigua, ");
+        sb.append(".=Lliure\n");
         sb.append("Tirs rebuts: ").append(disparosRebuts.size()).append("\n");
         sb.append("Vaixells enfonsats: ").append(vaixellsEnfonsats)
                 .append("/").append(vaixellsTotal).append("\n");
@@ -147,27 +159,56 @@ public class Tauler implements Serializable {
 
     public String getTaulerVisual() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n=== TAULER DE ").append(nomJugador).append(" ===\n");
-        sb.append("   0 1 2 3 4 5 6 7 8 9\n");
+        sb.append("\n--- TAULER DE ").append(nomJugador).append(" ---\n");
+        sb.append("  0 1 2 3 4 5 6 7 8 9\n");
         for (int i = 0; i < Constants.TAULER_MIDA; i++) {
-            sb.append(i).append("  ");
+            sb.append(i).append(" ");
             for (int j = 0; j < Constants.TAULER_MIDA; j++) {
                 switch (tauler[i][j]) {
-                    case  0: sb.append(". "); break;
-                    case  1: sb.append(". "); break;
-                    case -1: sb.append("X "); break;
-                    case -2: sb.append("~ "); break;
+                    case  0:
+                        sb.append(". ");
+                        break;
+                    case  1:
+                        sb.append(". ");
+                        break;
+                    case -1:
+                        sb.append(ColorTerminal.RED).append("X ").append(ColorTerminal.RESET);
+                        break;
+                    case -2:
+                        sb.append(ColorTerminal.BRIGHT_BLUE).append("~ ").append(ColorTerminal.RESET);
+                        break;
                 }
             }
             sb.append("\n");
         }
-        sb.append("Llegenda: X=Tocat, ~=Aigua, .=Desconegut\n");
+        sb.append("Llegenda: ");
+        sb.append(ColorTerminal.RED).append("X").append(ColorTerminal.RESET).append("=Tocat, ");
+        sb.append(ColorTerminal.BRIGHT_BLUE).append("~").append(ColorTerminal.RESET).append("=Aigua, ");
+        sb.append(".=Desconegut\n");
         sb.append("Tirs rebuts: ").append(disparosRebuts.size()).append("\n");
         sb.append("Vaixells enfonsats: ").append(vaixellsEnfonsats)
                 .append("/").append(vaixellsTotal).append("\n");
         return sb.toString();
     }
 
-    public synchronized boolean isVictoria() { return victoria; }
-    public String getNomJugador() { return nomJugador; }
+
+    public synchronized boolean isVictoria() {
+        return victoria;
+    }
+
+    public String getNomJugador() {
+        return nomJugador;
+    }
+
+    public synchronized int getVaixellsEnfonsats() {
+        return vaixellsEnfonsats;
+    }
+
+    public synchronized int getVaixellsTotal() {
+        return vaixellsTotal;
+    }
+
+    public synchronized int getTirsRebuts() {
+        return disparosRebuts.size();
+    }
 }
